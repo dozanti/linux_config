@@ -1,5 +1,5 @@
 #!/bin/bash
-# Fresh-install bootstrap for Zsh + Oh My Zsh + Powerlevel10k + fnm + GNOME Terminal.
+# Fresh-install bootstrap for Zsh + Oh My Zsh + Powerlevel10k + fnm + Ptyxis/GNOME Terminal.
 set -euo pipefail
 
 echo "[INFO] Installing dependencies..."
@@ -69,21 +69,66 @@ curl -fsSL https://raw.githubusercontent.com/PapirusDevelopmentTeam/papirus-icon
 echo "[INFO] Setting Zsh as the default shell..."
 chsh -s "$(command -v zsh)"
 
+TERMINAL_FONT='JetBrainsMono Nerd Font 12'
+
+has_schema() {
+  gsettings list-schemas | grep -xF "$1" >/dev/null
+}
+
+configure_ptyxis() {
+  local profile_id profile_ids
+  profile_id=$(gsettings get org.gnome.Ptyxis default-profile-uuid | tr -d "'")
+
+  # Ptyxis creates its first profile lazily on first launch, so a fresh
+  # install has none yet; create it here so the palette can be applied.
+  if [[ -z "$profile_id" ]]; then
+    profile_id=$(tr -d '-' </proc/sys/kernel/random/uuid)
+    profile_ids=$(gsettings get org.gnome.Ptyxis profile-uuids)
+    if [[ "$profile_ids" == *"[]" ]]; then
+      profile_ids="['$profile_id']"
+    else
+      profile_ids="${profile_ids%]}, '$profile_id']"
+    fi
+    gsettings set org.gnome.Ptyxis profile-uuids "$profile_ids"
+    gsettings set org.gnome.Ptyxis default-profile-uuid "$profile_id"
+  fi
+
+  gsettings set org.gnome.Ptyxis use-system-font false
+  gsettings set org.gnome.Ptyxis font-name "$TERMINAL_FONT"
+  gsettings set "org.gnome.Ptyxis.Profile:/org/gnome/Ptyxis/Profiles/$profile_id/" palette 'Vs Code'
+}
+
+configure_gnome_terminal() {
+  local profile_id profile_path
+  profile_id=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
+  profile_path="org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$profile_id/"
+
+  gsettings set "$profile_path" use-system-font false
+  gsettings set "$profile_path" font "$TERMINAL_FONT"
+  gsettings set "$profile_path" use-theme-colors false
+  gsettings set "$profile_path" background-color '#1E1E1E'
+  gsettings set "$profile_path" foreground-color '#C0C0C0'
+}
+
 if command -v gsettings >/dev/null 2>&1; then
-  echo "[INFO] Configuring GNOME Terminal..."
-  PROFILE_ID=$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d "'")
-  PROFILE_PATH="org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/:$PROFILE_ID/"
+  if has_schema org.gnome.Ptyxis; then
+    echo "[INFO] Configuring Ptyxis..."
+    configure_ptyxis
+  elif has_schema org.gnome.Terminal.ProfilesList; then
+    echo "[INFO] Configuring GNOME Terminal..."
+    configure_gnome_terminal
+  else
+    echo "[INFO] Neither Ptyxis nor GNOME Terminal found, skipping terminal styling."
+  fi
 
-  gsettings set "$PROFILE_PATH" use-system-font false
-  gsettings set "$PROFILE_PATH" font 'JetBrainsMono Nerd Font 12'
-  gsettings set "$PROFILE_PATH" use-theme-colors false
-  gsettings set "$PROFILE_PATH" background-color '#1E1E1E'
-  gsettings set "$PROFILE_PATH" foreground-color '#C0C0C0'
-
-  echo "[INFO] Setting Papirus as the active icon theme..."
-  gsettings set org.gnome.desktop.interface icon-theme 'Papirus'
+  if has_schema org.gnome.desktop.interface; then
+    echo "[INFO] Setting Papirus as the active icon theme..."
+    gsettings set org.gnome.desktop.interface icon-theme 'Papirus'
+  else
+    echo "[INFO] GNOME interface settings not found, skipping icon theme selection."
+  fi
 else
-  echo "[INFO] gsettings not found, skipping GNOME Terminal styling and icon theme selection."
+  echo "[INFO] gsettings not found, skipping terminal styling and icon theme selection."
 fi
 
 echo "[INFO] Installation complete."

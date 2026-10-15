@@ -10,7 +10,7 @@ Personal Linux bootstrap configuration for a fresh Ubuntu/Debian desktop with GN
 
 ## Contents
 
-- `terminal/` installs Zsh, Oh My Zsh, Powerlevel10k, fnm with the latest Node.js LTS release, syntax highlighting, JetBrains Mono Nerd Font, the Papirus icon theme (always the latest release), and configures GNOME Terminal.
+- `terminal/` installs Zsh, Oh My Zsh, Powerlevel10k, fnm with the latest Node.js LTS release, syntax highlighting, JetBrains Mono Nerd Font, the Papirus icon theme (always the latest release), and styles the terminal (Ptyxis, the default since Ubuntu 25.10, or GNOME Terminal on older releases).
 - `apps/` contains application configuration, including Firefox preferences and Zed settings.
 - `git/` contains a `.gitconfig` template (user identity, default branch, rebase-on-pull).
 - `wallpaper/` stores the wallpaper image and its source link.
@@ -23,7 +23,7 @@ Run the terminal installer as the desktop user:
 bash terminal/install_terminal.sh
 ```
 
-The script uses `sudo` to install packages, replaces `~/.zshrc` and `~/.p10k.zsh` (backing up any existing ones first), installs the latest Papirus icon theme release, changes the login shell to Zsh, and configures the active GNOME Terminal profile plus the system icon theme. It is intended for a fresh installation; on GNOME-less desktops the terminal styling and icon theme selection steps are skipped automatically.
+The script uses `sudo` to install packages, replaces `~/.zshrc` and `~/.p10k.zsh` (backing up any existing ones first), installs the latest Papirus icon theme release, changes the login shell to Zsh, and sets the system icon theme. It applies JetBrains Mono Nerd Font 12 and the built-in `Vs Code` palette to the default Ptyxis profile (creating the profile if Ptyxis has never been opened), or falls back to styling the default GNOME Terminal profile when Ptyxis is not installed. It is intended for a fresh installation; on GNOME-less desktops the terminal styling and icon theme selection steps are skipped automatically.
 
 Log out and back in after it completes so the login-shell change takes effect.
 

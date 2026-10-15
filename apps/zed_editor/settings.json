@@ -1,9 +1,11 @@
 {
+  "cli_default_open_behavior": "new_window",
   "buffer_font_weight": 400.0,
   "minimap": {
     "show": "never"
   },
   "git_panel": {
+    "dock": "left",
     "status_style": "icon"
   },
   "outline_panel": {
@@ -13,7 +15,7 @@
     "shell": "system"
   },
   "disable_ai": true,
-  "restore_on_startup": "none",
+  "restore_on_startup": "empty_tab",
   "git": {
     "inline_blame": {
       "show_commit_summary": false
@@ -30,8 +32,8 @@
     "git_status": true
   },
   "title_bar": {
-    "show_menus": false,
-    "show_branch_icon": true
+    "show_branch_status_icon": true,
+    "show_menus": false
   },
   "languages": {
     "JSON": {
@@ -58,13 +60,13 @@
     "light": "Material Icon Theme",
     "dark": "Material Icon Theme"
   },
-  "redact_private_values": true,
+  "redact_private_values": false,
   "use_system_path_prompts": true,
   "show_edit_predictions": false,
-  "ui_font_size": 21.0,
+  "ui_font_size": 16,
   "buffer_font_size": 15,
   "theme": {
-    "mode": "system",
+    "mode": "dark",
     "light": "One Light",
     "dark": "VSCode Dark Modern"
   },
